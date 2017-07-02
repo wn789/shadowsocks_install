@@ -674,10 +674,10 @@ install_completed_libev() {
     clear
     echo
     echo -e "Congratulations, ${green}${software[3]}${plain} server install completed!"
-    echo -e "Your Server IP        : ${red} $(get_ip) ${plain}"
-    echo -e "Your Server Port      : ${red} ${shadowsocksport} ${plain}"
-    echo -e "Your Password         : ${red} ${shadowsockspwd} ${plain}"
-    echo -e "Your Encryption Method: ${red} aes-256-cfb ${plain}"
+    echo -e "Your Server IP你的IP           : ${red} $(get_ip) ${plain}"
+    echo -e "Your Server Port端口           : ${red} ${shadowsocksport} ${plain}"
+    echo -e "Your Password密码              : ${red} ${shadowsockspwd} ${plain}"
+    echo -e "Your Encryption Method加密方式 : ${red} aes-256-cfb ${plain}"
 }
 
 install_main(){
@@ -703,7 +703,6 @@ install_main(){
     fi
 
     echo
-    echo "Welcome to visit: https://teddysun.com/486.html"
     echo "Enjoy it!"
     echo
 }
