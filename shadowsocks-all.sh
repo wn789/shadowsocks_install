@@ -6,13 +6,6 @@
 #
 # System Required:  CentOS 6+, Debian7+, Ubuntu12+
 #
-# Thanks:
-# @clowwindy  <https://twitter.com/clowwindy>
-# @breakwa11  <https://twitter.com/breakwa11>
-# @cyfdecyf   <https://twitter.com/cyfdecyf>
-# @madeye     <https://github.com/madeye>
-# 
-# Intro:  https://teddysun.com/486.html
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -34,15 +27,15 @@ shadowsocks_python_file="shadowsocks-master"
 shadowsocks_python_url="https://github.com/shadowsocks/shadowsocks/archive/master.zip"
 shadowsocks_python_init="/etc/init.d/shadowsocks-python"
 shadowsocks_python_config="/etc/shadowsocks-python/config.json"
-shadowsocks_python_centos="https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks"
-shadowsocks_python_debian="https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-debian"
+shadowsocks_python_centos="https://raw.githubusercontent.com/wn789/shadowsocks_install/master/shadowsocks"
+shadowsocks_python_debian="https://raw.githubusercontent.com/wn789/shadowsocks_install/master/shadowsocks-debian"
 
 shadowsocks_r_file="shadowsocksr-manyuser"
 shadowsocks_r_url="https://github.com/shadowsocksr/shadowsocksr/archive/manyuser.zip"
 shadowsocks_r_init="/etc/init.d/shadowsocks-r"
 shadowsocks_r_config="/etc/shadowsocks-r/config.json"
-shadowsocks_r_centos="https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocksR"
-shadowsocks_r_debian="https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocksR-debian"
+shadowsocks_r_centos="https://raw.githubusercontent.com/wn789/shadowsocks_install/master/shadowsocksR"
+shadowsocks_r_debian="https://raw.githubusercontent.com/wn789/shadowsocks_install/master/shadowsocksR-debian"
 
 shadowsocks_go_file_64="shadowsocks-server-linux64-1.2.1"
 shadowsocks_go_url_64="http://dl.teddysun.com/shadowsocks/shadowsocks-server-linux64-1.2.1.gz"
@@ -50,13 +43,13 @@ shadowsocks_go_file_32="shadowsocks-server-linux32-1.2.1"
 shadowsocks_go_url_32="http://dl.teddysun.com/shadowsocks/shadowsocks-server-linux32-1.2.1.gz"
 shadowsocks_go_init="/etc/init.d/shadowsocks-go"
 shadowsocks_go_config="/etc/shadowsocks-go/config.json"
-shadowsocks_go_centos="https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-go"
-shadowsocks_go_debian="https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-go-debian"
+shadowsocks_go_centos="https://raw.githubusercontent.com/wn789/shadowsocks_install/master/shadowsocks-go"
+shadowsocks_go_debian="https://raw.githubusercontent.com/wn789/shadowsocks_install/master/shadowsocks-go-debian"
 
 shadowsocks_libev_init="/etc/init.d/shadowsocks-libev"
 shadowsocks_libev_config="/etc/shadowsocks-libev/config.json"
-shadowsocks_libev_centos="https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-libev"
-shadowsocks_libev_debian="https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-libev-debian"
+shadowsocks_libev_centos="https://raw.githubusercontent.com/wn789/shadowsocks_install/master/shadowsocks-libev"
+shadowsocks_libev_debian="https://raw.githubusercontent.com/wn789/shadowsocks_install/master/shadowsocks-libev-debian"
 
 disable_selinux() {
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
