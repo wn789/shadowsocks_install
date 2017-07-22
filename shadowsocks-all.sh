@@ -2,8 +2,6 @@
 #
 # Auto install Shadowsocks Server (all version)
 #
-# Copyright (C) 2016-2017 Teddysun <i@teddysun.com>
-#
 # System Required:  CentOS 6+, Debian7+, Ubuntu12+
 #
 # Reference URL:
