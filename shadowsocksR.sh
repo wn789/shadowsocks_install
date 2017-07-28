@@ -50,6 +50,7 @@ auth_sha1_v4_compatible
 auth_aes128_md5
 auth_aes128_sha1
 auth_chain_a
+auth_chain_b
 )
 # obfs
 obfs=(
@@ -318,7 +319,7 @@ download_files(){
         exit 1
     fi
     # Download ShadowsocksR file
-    if ! wget --no-check-certificate -O manyuser.zip https://github.com/shadowsocksr/shadowsocksr/archive/manyuser.zip; then
+    if ! wget --no-check-certificate -O manyuser.zip https://github.com/teddysun/shadowsocksr/archive/manyuser.zip; then
         echo -e "[${red}Error${plain}] Failed to download ShadowsocksR file!"
         exit 1
     fi

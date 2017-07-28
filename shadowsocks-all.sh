@@ -45,7 +45,7 @@ shadowsocks_python_centos="https://raw.githubusercontent.com/teddysun/shadowsock
 shadowsocks_python_debian="https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-debian"
 
 shadowsocks_r_file="shadowsocksr-manyuser"
-shadowsocks_r_url="https://github.com/shadowsocksr/shadowsocksr/archive/manyuser.zip"
+shadowsocks_r_url="https://github.com/teddysun/shadowsocksr/archive/manyuser.zip"
 shadowsocks_r_init="/etc/init.d/shadowsocks-r"
 shadowsocks_r_config="/etc/shadowsocks-r/config.json"
 shadowsocks_r_centos="https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocksR"
@@ -123,6 +123,7 @@ auth_sha1_v4_compatible
 auth_aes128_md5
 auth_aes128_sha1
 auth_chain_a
+auth_chain_b
 )
 # obfs
 obfs=(
