@@ -15,8 +15,8 @@ cur_dir=`pwd`
 libsodium_file="libsodium-1.0.13"
 libsodium_url="https://github.com/jedisct1/libsodium/releases/download/1.0.13/libsodium-1.0.13.tar.gz"
 
-mbedtls_file="mbedtls-2.5.1"
-mbedtls_url="http://dl.teddysun.com/files/mbedtls-2.5.1-gpl.tgz"
+mbedtls_file="mbedtls-2.6.0"
+mbedtls_url="http://dl.teddysun.com/files/mbedtls-2.6.0-gpl.tgz"
 
 # Stream Ciphers
 ciphers=(
@@ -32,9 +32,11 @@ aes-128-cfb
 camellia-128-cfb
 camellia-192-cfb
 camellia-256-cfb
+xchacha20-ietf-poly1305
 chacha20-ietf-poly1305
 chacha20-ietf
 chacha20
+salsa20
 rc4-md5
 )
 # Color
@@ -294,7 +296,7 @@ pre_install(){
     # Update System
     apt-get -y update
     # Install necessary dependencies
-    apt-get -y --no-install-recommends install gettext build-essential autoconf automake libtool openssl libssl-dev zlib1g-dev libpcre3-dev libudns-dev libev-dev
+    apt-get -y --no-install-recommends install gettext build-essential autoconf automake libtool openssl libssl-dev zlib1g-dev libpcre3-dev libudns-dev libev-dev libc-ares-dev
 }
 
 download() {
