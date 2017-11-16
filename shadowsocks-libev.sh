@@ -250,7 +250,7 @@ pre_install(){
     fi
 
     # Set shadowsocks-libev config password
-    echo "Please input password for shadowsocks-libev:"
+    echo "Please enter password for shadowsocks-libev:"
     read -p "(Default password: teddysun.com):" shadowsockspwd
     [ -z "${shadowsockspwd}" ] && shadowsockspwd="teddysun.com"
     echo
@@ -262,24 +262,21 @@ pre_install(){
     # Set shadowsocks-libev config port
     while true
     do
-    echo -e "Please input port for shadowsocks-libev [1-65535]:"
+    echo -e "Please enter a port for shadowsocks-libev [1-65535]:"
     read -p "(Default port: 8989):" shadowsocksport
     [ -z "$shadowsocksport" ] && shadowsocksport="8989"
     expr ${shadowsocksport} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
-        if [ ${shadowsocksport} -ge 1 ] && [ ${shadowsocksport} -le 65535 ]; then
+        if [ ${shadowsocksport} -ge 1 ] && [ ${shadowsocksport} -le 65535 ] && [ ${shadowsocksport:0:1} != 0 ]; then
             echo
             echo "---------------------------"
             echo "port = ${shadowsocksport}"
             echo "---------------------------"
             echo
             break
-        else
-            echo -e "[${red}Error${plain}] Input error, please input a number between 1 and 65535"
         fi
-    else
-        echo -e "[${red}Error${plain}] Input error, please input a number between 1 and 65535"
     fi
+    echo -e "[${red}Error${plain}] Please enter a correct number [1-65535]"
     done
 
     # Set shadowsocks config stream ciphers
@@ -294,11 +291,11 @@ pre_install(){
     [ -z "$pick" ] && pick=1
     expr ${pick} + 1 &>/dev/null
     if [ $? -ne 0 ]; then
-        echo -e "[${red}Error${plain}] Input error, please input a number"
+        echo -e "[${red}Error${plain}] Please enter a number"
         continue
     fi
     if [[ "$pick" -lt 1 || "$pick" -gt ${#ciphers[@]} ]]; then
-        echo -e "[${red}Error${plain}] Input error, please input a number between 1 and ${#ciphers[@]}"
+        echo -e "[${red}Error${plain}] Please enter a number between 1 and ${#ciphers[@]}"
         continue
     fi
     shadowsockscipher=${ciphers[$pick-1]}
@@ -314,13 +311,17 @@ pre_install(){
     echo "Press any key to start...or press Ctrl+C to cancel"
     char=`get_char`
     #Install necessary dependencies
-    echo -e "[${green}Info${plain}] Adding the EPEL repository..."
-    [ ! -f /etc/yum.repos.d/epel.repo ] && yum install -y epel-release
-    [ ! "$(command -v yum-config-manager)" ] && yum install -y yum-utils
-    [ ! -f /etc/yum.repos.d/epel.repo ] && echo -e "${red}Error${plain} Install EPEL repository failed, please check it." && exit 1
-    [ -f /etc/yum.repos.d/epel.repo ] && yum-config-manager --enable epel
-    echo -e "[${green}Info${plain}] Adding the EPEL repository complete..."
-    yum install -y unzip openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto udns-devel libev-devel pcre pcre-devel git c-ares-devel
+    echo -e "[${green}Info${plain}] Checking the EPEL repository..."
+    if [ ! -f /etc/yum.repos.d/epel.repo ]; then
+        yum install -y -q epel-release
+    fi
+    [ ! -f /etc/yum.repos.d/epel.repo ] && echo -e "[${red}Error${plain}] Install EPEL repository failed, please check it." && exit 1
+    [ ! "$(command -v yum-config-manager)" ] && yum install -y -q yum-utils
+    if [ x"`yum-config-manager epel | grep -w enabled | awk '{print $3}'`" != x"True" ]; then
+        yum-config-manager --enable epel
+    fi
+    echo -e "[${green}Info${plain}] Checking the EPEL repository complete..."
+    yum install -y -q unzip openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto libev-devel pcre pcre-devel git c-ares-devel
 }
 
 download() {

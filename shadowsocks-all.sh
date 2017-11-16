@@ -309,8 +309,6 @@ download() {
 download_files() {
     cd ${cur_dir}
 
-    download "${libsodium_file}.tar.gz" "${libsodium_url}"
-
     if   [ "${selected}" == "1" ]; then
         download "${shadowsocks_python_file}.zip" "${shadowsocks_python_url}"
         if check_sys packageManager yum; then
@@ -342,7 +340,6 @@ download_files() {
         shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/${libev_ver}/${shadowsocks_libev_file}.tar.gz"
 
         download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
-        download "${mbedtls_file}-gpl.tgz" "${mbedtls_url}"
         if check_sys packageManager yum; then
             download "${shadowsocks_libev_init}" "${shadowsocks_libev_centos}"
         elif check_sys packageManager apt; then
@@ -498,34 +495,31 @@ fi
 
 install_dependencies() {
     if check_sys packageManager yum; then
-        echo -e "[${green}Info${plain}] Adding the EPEL repository..."
-        [ ! -f /etc/yum.repos.d/epel.repo ] && yum install -y epel-release
-        [ ! "$(command -v yum-config-manager)" ] && yum install -y yum-utils
+        echo -e "[${green}Info${plain}] Checking the EPEL repository..."
+        if [ ! -f /etc/yum.repos.d/epel.repo ]; then
+            yum install -y -q epel-release
+        fi
         [ ! -f /etc/yum.repos.d/epel.repo ] && echo -e "[${red}Error${plain}] Install EPEL repository failed, please check it." && exit 1
-        [ -f /etc/yum.repos.d/epel.repo ] && yum-config-manager --enable epel
-        echo -e "[${green}Info${plain}] Adding the EPEL repository complete..."
+        [ ! "$(command -v yum-config-manager)" ] && yum install -y -q yum-utils
+        if [ x"`yum-config-manager epel | grep -w enabled | awk '{print $3}'`" != x"True" ]; then
+            yum-config-manager --enable epel
+        fi
+        echo -e "[${green}Info${plain}] Checking the EPEL repository complete..."
 
         yum_depends=(
             unzip gzip openssl openssl-devel gcc python python-devel python-setuptools pcre pcre-devel libtool libevent xmlto
             autoconf automake make curl curl-devel zlib-devel perl perl-devel cpio expat-devel gettext-devel asciidoc
-            libev-devel udns-devel c-ares-devel git
+            libev-devel c-ares-devel git qrencode
         )
         for depend in ${yum_depends[@]}; do
-            error_detect_depends "yum -y install ${depend}"
+            error_detect_depends "yum -y -q install ${depend}"
         done
     elif check_sys packageManager apt; then
         apt_depends=(
             gettext build-essential unzip gzip python python-dev python-setuptools curl openssl libssl-dev
-            autoconf automake libtool gcc make perl cpio libpcre3 libpcre3-dev zlib1g-dev
-            libudns-dev libev-dev libc-ares-dev git
+            autoconf automake libtool gcc make perl cpio libpcre3 libpcre3-dev zlib1g-dev libev-dev libc-ares-dev git qrencode
         )
-        # Check jessie in source.list
-        if debianversion 7; then
-            grep "jessie" /etc/apt/sources.list > /dev/null 2>&1
-            if [ $? -ne 0 ] && [ -r /etc/apt/sources.list ]; then
-                echo "deb http://http.us.debian.org/debian jessie main" >> /etc/apt/sources.list
-            fi
-        fi
+
         apt-get -y update
         for depend in ${apt_depends[@]}; do
             error_detect_depends "apt-get -y install ${depend}"
@@ -592,17 +586,14 @@ install_prepare_port() {
     [ -z "${shadowsocksport}" ] && shadowsocksport="8989"
     expr ${shadowsocksport} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
-        if [ ${shadowsocksport} -ge 1 ] && [ ${shadowsocksport} -le 65535 ]; then
+        if [ ${shadowsocksport} -ge 1 ] && [ ${shadowsocksport} -le 65535 ] && [ ${shadowsocksport:0:1} != 0 ]; then
             echo
             echo "port = ${shadowsocksport}"
             echo
             break
-        else
-            echo -e "[${red}Error${plain}] Please enter a correct number [1-65535]"
         fi
-    else
-        echo -e "[${red}Error${plain}] Please enter a correct number [1-65535]"
     fi
+    echo -e "[${red}Error${plain}] Please enter a correct number [1-65535]"
     done
 }
 
@@ -620,11 +611,11 @@ install_prepare_cipher() {
         [ -z "$pick" ] && pick=1
         expr ${pick} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
-            echo -e "[${red}Error${plain}] Input error, please input a number"
+            echo -e "[${red}Error${plain}] Please enter a number"
             continue
         fi
         if [[ "$pick" -lt 1 || "$pick" -gt ${#common_ciphers[@]} ]]; then
-            echo -e "[${red}Error${plain}] Input error, please input a number between 1 and ${#common_ciphers[@]}"
+            echo -e "[${red}Error${plain}] Please enter a number between 1 and ${#common_ciphers[@]}"
             continue
         fi
         shadowsockscipher=${common_ciphers[$pick-1]}
@@ -637,11 +628,11 @@ install_prepare_cipher() {
         [ -z "$pick" ] && pick=2
         expr ${pick} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
-            echo -e "[${red}Error${plain}] Input error, please input a number"
+            echo -e "[${red}Error${plain}] Please enter a number"
             continue
         fi
         if [[ "$pick" -lt 1 || "$pick" -gt ${#r_ciphers[@]} ]]; then
-            echo -e "[${red}Error${plain}] Input error, please input a number between 1 and ${#r_ciphers[@]}"
+            echo -e "[${red}Error${plain}] Please enter a number between 1 and ${#r_ciphers[@]}"
             continue
         fi
         shadowsockscipher=${r_ciphers[$pick-1]}
@@ -654,11 +645,11 @@ install_prepare_cipher() {
         [ -z "$pick" ] && pick=1
         expr ${pick} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
-            echo -e "[${red}Error${plain}] Input error, please input a number"
+            echo -e "[${red}Error${plain}] Please enter a number"
             continue
         fi
         if [[ "$pick" -lt 1 || "$pick" -gt ${#go_ciphers[@]} ]]; then
-            echo -e "[${red}Error${plain}] Input error, please input a number between 1 and ${#go_ciphers[@]}"
+            echo -e "[${red}Error${plain}] Please enter a number between 1 and ${#go_ciphers[@]}"
             continue
         fi
         shadowsockscipher=${go_ciphers[$pick-1]}
@@ -683,11 +674,11 @@ install_prepare_protocol() {
     [ -z "$protocol" ] && protocol=1
     expr ${protocol} + 1 &>/dev/null
     if [ $? -ne 0 ]; then
-        echo -e "[${red}Error${plain}] Input error, please input a number"
+        echo -e "[${red}Error${plain}] Please enter a number"
         continue
     fi
     if [[ "$protocol" -lt 1 || "$protocol" -gt ${#protocols[@]} ]]; then
-        echo -e "[${red}Error${plain}] Input error, please input a number between 1 and ${#protocols[@]}"
+        echo -e "[${red}Error${plain}] Please enter a number between 1 and ${#protocols[@]}"
         continue
     fi
     shadowsockprotocol=${protocols[$protocol-1]}
@@ -710,11 +701,11 @@ install_prepare_obfs() {
     [ -z "$r_obfs" ] && r_obfs=1
     expr ${r_obfs} + 1 &>/dev/null
     if [ $? -ne 0 ]; then
-        echo -e "[${red}Error${plain}] Input error, please input a number"
+        echo -e "[${red}Error${plain}] Please enter a number"
         continue
     fi
     if [[ "$r_obfs" -lt 1 || "$r_obfs" -gt ${#obfs[@]} ]]; then
-        echo -e "[${red}Error${plain}] Input error, please input a number between 1 and ${#obfs[@]}"
+        echo -e "[${red}Error${plain}] Please enter a number between 1 and ${#obfs[@]}"
         continue
     fi
     shadowsockobfs=${obfs[$r_obfs-1]}
@@ -757,11 +748,11 @@ install_prepare_libev_obfs() {
             [ -z "$r_libev_obfs" ] && r_libev_obfs=1
             expr ${r_libev_obfs} + 1 &>/dev/null
             if [ $? -ne 0 ]; then
-                echo -e "[${red}Error${plain}] Input error, please input a number"
+                echo -e "[${red}Error${plain}] Please enter a number"
                 continue
             fi
             if [[ "$r_libev_obfs" -lt 1 || "$r_libev_obfs" -gt ${#obfs_libev[@]} ]]; then
-                echo -e "[${red}Error${plain}] Input error, please input a number between 1 and ${#obfs_libev[@]}"
+                echo -e "[${red}Error${plain}] Please enter a number between 1 and ${#obfs_libev[@]}"
                 continue
             fi
             shadowsocklibev_obfs=${obfs_libev[$r_libev_obfs-1]}
@@ -802,6 +793,7 @@ install_prepare() {
 install_libsodium() {
     if [ ! -f /usr/lib/libsodium.a ]; then
         cd ${cur_dir}
+        download "${libsodium_file}.tar.gz" "${libsodium_url}"
         tar zxf ${libsodium_file}.tar.gz
         cd ${libsodium_file}
         ./configure --prefix=/usr && make && make install
@@ -818,6 +810,7 @@ install_libsodium() {
 install_mbedtls() {
     if [ ! -f /usr/lib/libmbedtls.a ]; then
         cd ${cur_dir}
+        download "${mbedtls_file}-gpl.tgz" "${mbedtls_url}"
         tar xf ${mbedtls_file}-gpl.tgz
         cd ${mbedtls_file}
         make SHARED=1 CFLAGS=-fPIC
@@ -1021,6 +1014,59 @@ install_completed_libev() {
     echo -e "Your Encryption Method: ${red} ${shadowsockscipher} ${plain}"
 }
 
+qr_generate_python() {
+    if [ "$(command -v qrencode)" ]; then
+        local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}" | base64 -w0)
+        local qr_code="ss://${tmp}@$(get_ip):${shadowsocksport}"
+        echo
+        echo "Your QR Code: (For Shadowsocks Windows, OSX, Android and iOS clients)"
+        echo -e "${green} ${qr_code} ${plain}"
+        echo -n "${qr_code}" | qrencode -s8 -o ${cur_dir}/shadowsocks_python_qr.png
+        echo "Your QR Code has been saved as a PNG file path:"
+        echo -e "${green} ${cur_dir}/shadowsocks_python_qr.png ${plain}"
+    fi
+}
+
+qr_generate_r() {
+    if [ "$(command -v qrencode)" ]; then
+        local tmp1=$(echo -n "${shadowsockspwd}" | base64 -w0 | sed 's/=//g;s/\//_/g;s/+/-/g')
+        local tmp2=$(echo -n "$(get_ip):${shadowsocksport}:${shadowsockprotocol}:${shadowsockscipher}:${shadowsockobfs}:${tmp1}/?obfsparam=" | base64 -w0)
+        local qr_code="ssr://${tmp2}"
+        echo
+        echo "Your QR Code: (For ShadowsocksR Windows, Android clients only)"
+        echo -e "${green} ${qr_code} ${plain}"
+        echo -n "${qr_code}" | qrencode -s8 -o ${cur_dir}/shadowsocks_r_qr.png
+        echo "Your QR Code has been saved as a PNG file path:"
+        echo -e "${green} ${cur_dir}/shadowsocks_r_qr.png ${plain}"
+    fi
+}
+
+qr_generate_go() {
+    if [ "$(command -v qrencode)" ]; then
+        local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}" | base64 -w0)
+        local qr_code="ss://${tmp}@$(get_ip):${shadowsocksport}"
+        echo
+        echo "Your QR Code: (For Shadowsocks Windows, OSX, Android and iOS clients)"
+        echo -e "${green} ${qr_code} ${plain}"
+        echo -n "${qr_code}" | qrencode -s8 -o ${cur_dir}/shadowsocks_go_qr.png
+        echo "Your QR Code has been saved as a PNG file path:"
+        echo -e "${green} ${cur_dir}/shadowsocks_go_qr.png ${plain}"
+    fi
+}
+
+qr_generate_libev() {
+    if [ "$(command -v qrencode)" ]; then
+        local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}" | base64 -w0)
+        local qr_code="ss://${tmp}@$(get_ip):${shadowsocksport}"
+        echo
+        echo "Your QR Code: (For Shadowsocks Windows, OSX, Android and iOS clients)"
+        echo -e "${green} ${qr_code} ${plain}"
+        echo -n "${qr_code}" | qrencode -s8 -o ${cur_dir}/shadowsocks_libev_qr.png
+        echo "Your QR Code has been saved as a PNG file path:"
+        echo -e "${green} ${cur_dir}/shadowsocks_libev_qr.png ${plain}"
+    fi
+}
+
 install_main(){
     install_libsodium
     if ! ldconfig -p | grep -wq "/usr/lib"; then
@@ -1031,17 +1077,21 @@ install_main(){
     if   [ "${selected}" == "1" ]; then
         install_shadowsocks_python
         install_completed_python
+        qr_generate_python
     elif [ "${selected}" == "2" ]; then
         install_shadowsocks_r
         install_completed_r
+        qr_generate_r
     elif [ "${selected}" == "3" ]; then
         install_shadowsocks_go
         install_completed_go
+        qr_generate_go
     elif [ "${selected}" == "4" ]; then
         install_mbedtls
         install_shadowsocks_libev
         install_shadowsocks_libev_obfs
         install_completed_libev
+        qr_generate_libev
     fi
 
     echo
