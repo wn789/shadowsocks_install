@@ -204,6 +204,19 @@ version_ge(){
     test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" == "$1"
 }
 
+version_gt(){
+    test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"
+}
+
+check_kernel_version() {
+    local kernel_version=$(uname -r | cut -d- -f1)
+    if version_gt ${kernel_version} 3.7.0; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 getversion() {
     if [[ -s /etc/redhat-release ]]; then
         grep -oE  "[0-9.]+" /etc/redhat-release
@@ -399,6 +412,13 @@ config_firewall() {
 }
 
 config_shadowsocks() {
+
+if check_kernel_version; then
+    fast_open="true"
+else
+    fast_open="false"
+fi
+
 if   [ "${selected}" == "1" ]; then
     if [ ! -d "$(dirname ${shadowsocks_python_config})" ]; then
         mkdir -p $(dirname ${shadowsocks_python_config})
@@ -412,7 +432,7 @@ if   [ "${selected}" == "1" ]; then
     "password":"${shadowsockspwd}",
     "timeout":300,
     "method":"${shadowsockscipher}",
-    "fast_open":false
+    "fast_open":${fast_open}
 }
 EOF
 elif [ "${selected}" == "2" ]; then
@@ -435,7 +455,7 @@ elif [ "${selected}" == "2" ]; then
     "obfs_param":"",
     "redirect":"",
     "dns_ipv6":false,
-    "fast_open":false,
+    "fast_open":${fast_open},
     "workers":1
 }
 EOF
@@ -473,6 +493,7 @@ elif [ "${selected}" == "4" ]; then
     "password":"${shadowsockspwd}",
     "timeout":300,
     "method":"${shadowsockscipher}",
+    "fast_open":${fast_open},
     "plugin":"obfs-server --obfs ${shadowsocklibev_obfs}"
 }
 EOF
@@ -485,7 +506,8 @@ EOF
     "local_port":1080,
     "password":"${shadowsockspwd}",
     "timeout":300,
-    "method":"${shadowsockscipher}"
+    "method":"${shadowsockscipher}",
+    "fast_open":${fast_open}
 }
 EOF
     fi
@@ -1016,8 +1038,8 @@ install_completed_libev() {
 
 qr_generate_python() {
     if [ "$(command -v qrencode)" ]; then
-        local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}" | base64 -w0)
-        local qr_code="ss://${tmp}@$(get_ip):${shadowsocksport}"
+        local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${shadowsocksport}" | base64 -w0)
+        local qr_code="ss://${tmp}"
         echo
         echo "Your QR Code: (For Shadowsocks Windows, OSX, Android and iOS clients)"
         echo -e "${green} ${qr_code} ${plain}"
@@ -1043,8 +1065,8 @@ qr_generate_r() {
 
 qr_generate_go() {
     if [ "$(command -v qrencode)" ]; then
-        local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}" | base64 -w0)
-        local qr_code="ss://${tmp}@$(get_ip):${shadowsocksport}"
+        local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${shadowsocksport}" | base64 -w0)
+        local qr_code="ss://${tmp}"
         echo
         echo "Your QR Code: (For Shadowsocks Windows, OSX, Android and iOS clients)"
         echo -e "${green} ${qr_code} ${plain}"
@@ -1056,8 +1078,8 @@ qr_generate_go() {
 
 qr_generate_libev() {
     if [ "$(command -v qrencode)" ]; then
-        local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}" | base64 -w0)
-        local qr_code="ss://${tmp}@$(get_ip):${shadowsocksport}"
+        local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${shadowsocksport}" | base64 -w0)
+        local qr_code="ss://${tmp}"
         echo
         echo "Your QR Code: (For Shadowsocks Windows, OSX, Android and iOS clients)"
         echo -e "${green} ${qr_code} ${plain}"
